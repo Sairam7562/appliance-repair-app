@@ -1,0 +1,342 @@
+'use client';
+
+import React, { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { FaSearch, FaStar, FaMapMarkerAlt, FaTools, FaPhone, FaEnvelope, FaCheck } from 'react-icons/fa';
+
+// Mock data for technicians
+const TECHNICIANS_DATA = [
+  {
+    id: 'tech-1',
+    name: 'John Smith',
+    company: 'Smith Appliance Repair',
+    rating: 4.8,
+    reviewCount: 124,
+    location: 'Chicago, IL',
+    distance: 3.2,
+    specialties: ['Refrigerator', 'Washing Machine', 'Dryer'],
+    availability: 'Available Tomorrow',
+    phone: '(555) 123-4567',
+    email: 'john@example.com',
+    image: 'https://via.placeholder.com/150?text=JS',
+    certified: true,
+    hourlyRate: '$65 - $85',
+    background: '15+ years experience with all major appliance brands. Certified technician for LG, Samsung, and Whirlpool.',
+  },
+  {
+    id: 'tech-2',
+    name: 'Maria Rodriguez',
+    company: 'Rodriguez Appliance Services',
+    rating: 4.9,
+    reviewCount: 213,
+    location: 'Chicago, IL',
+    distance: 5.7,
+    specialties: ['Refrigerator', 'Oven', 'Dishwasher', 'Microwave'],
+    availability: 'Available Today',
+    phone: '(555) 234-5678',
+    email: 'maria@example.com',
+    image: 'https://via.placeholder.com/150?text=MR',
+    certified: true,
+    hourlyRate: '$70 - $90',
+    background: 'Factory trained for high-end appliances. Specializes in Sub-Zero, Wolf, and Viking repairs with 10+ years experience.',
+  },
+  {
+    id: 'tech-3',
+    name: 'David Johnson',
+    company: 'Speedy Appliance Repair',
+    rating: 4.5,
+    reviewCount: 87,
+    location: 'Chicago, IL',
+    distance: 1.8,
+    specialties: ['Washing Machine', 'Dryer', 'Dishwasher'],
+    availability: 'Available in 3 Days',
+    phone: '(555) 345-6789',
+    email: 'david@example.com',
+    image: 'https://via.placeholder.com/150?text=DJ',
+    certified: false,
+    hourlyRate: '$55 - $75',
+    background: '7 years of experience with residential appliances. Affordable and reliable service with same-day availability for emergencies.',
+  },
+  {
+    id: 'tech-4',
+    name: 'Sarah Williams',
+    company: 'Williams Appliance Experts',
+    rating: 4.7,
+    reviewCount: 156,
+    location: 'Chicago, IL',
+    distance: 4.1,
+    specialties: ['Refrigerator', 'Freezer', 'Wine Cooler', 'Ice Maker'],
+    availability: 'Available Tomorrow',
+    phone: '(555) 456-7890',
+    email: 'sarah@example.com',
+    image: 'https://via.placeholder.com/150?text=SW',
+    certified: true,
+    hourlyRate: '$75 - $95',
+    background: 'Refrigeration specialist with EPA certification. Expert in diagnosing complex cooling issues in all types of refrigeration units.',
+  },
+  {
+    id: 'tech-5',
+    name: 'Mike Chen',
+    company: 'Chen\'s Appliance Repair',
+    rating: 4.6,
+    reviewCount: 92,
+    location: 'Chicago, IL',
+    distance: 6.3,
+    specialties: ['Oven', 'Range', 'Cooktop', 'Microwave'],
+    availability: 'Available Today',
+    phone: '(555) 567-8901',
+    email: 'mike@example.com',
+    image: 'https://via.placeholder.com/150?text=MC',
+    certified: true,
+    hourlyRate: '$65 - $85',
+    background: 'Cooking appliance expert with electrical engineering background. Specializes in electronic control systems and digital displays.',
+  },
+  {
+    id: 'tech-6',
+    name: 'Lisa Brown',
+    company: 'Brown\'s Home Services',
+    rating: 4.4,
+    reviewCount: 68,
+    location: 'Chicago, IL',
+    distance: 7.5,
+    specialties: ['Washing Machine', 'Dryer', 'Dishwasher'],
+    availability: 'Available in 2 Days',
+    phone: '(555) 678-9012',
+    email: 'lisa@example.com',
+    image: 'https://via.placeholder.com/150?text=LB',
+    certified: false,
+    hourlyRate: '$60 - $80',
+    background: 'Family-owned business with 20+ years serving the community. Full service for all major brands and models of laundry and kitchen appliances.',
+  },
+];
+
+export default function TechniciansPage({ searchParams }: { searchParams?: { appliance?: string } }) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState(searchParams?.appliance || '');
+  const [sortBy, setSortBy] = useState('distance');
+  const [availabilityFilter, setAvailabilityFilter] = useState('');
+  
+  // Filter technicians based on search and filters
+  const filteredTechnicians = TECHNICIANS_DATA.filter(tech => {
+    const matchesSearch = searchQuery === '' || 
+                         tech.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         tech.company.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSpecialty = selectedSpecialty === '' || 
+                           tech.specialties.some(s => s.toLowerCase() === selectedSpecialty.toLowerCase());
+    const matchesAvailability = availabilityFilter === '' ||
+                              tech.availability.includes(availabilityFilter);
+                              
+    return matchesSearch && matchesSpecialty && matchesAvailability;
+  });
+  
+  // Sort technicians
+  const sortedTechnicians = [...filteredTechnicians].sort((a, b) => {
+    if (sortBy === 'distance') {
+      return a.distance - b.distance;
+    } else if (sortBy === 'rating') {
+      return b.rating - a.rating;
+    } else if (sortBy === 'reviews') {
+      return b.reviewCount - a.reviewCount;
+    }
+    return 0;
+  });
+  
+  // Get all unique specialties for filter
+  const allSpecialties = Array.from(
+    new Set(TECHNICIANS_DATA.flatMap(tech => tech.specialties))
+  ).sort();
+  
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-2">Find an Appliance Technician</h1>
+      <p className="text-gray-600 mb-8">
+        Connect with trusted local professionals for appliance repairs you can't fix yourself.
+      </p>
+      
+      {/* Search and filters */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="mb-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by name or company..."
+              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Specialty
+            </label>
+            <select
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              value={selectedSpecialty}
+              onChange={(e) => setSelectedSpecialty(e.target.value)}
+            >
+              <option value="">All Specialties</option>
+              {allSpecialties.map(specialty => (
+                <option key={specialty} value={specialty}>
+                  {specialty}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Availability
+            </label>
+            <select
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              value={availabilityFilter}
+              onChange={(e) => setAvailabilityFilter(e.target.value)}
+            >
+              <option value="">Any Availability</option>
+              <option value="Today">Available Today</option>
+              <option value="Tomorrow">Available Tomorrow</option>
+              <option value="in">Available Later</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Sort By
+            </label>
+            <select
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              <option value="distance">Closest First</option>
+              <option value="rating">Highest Rated</option>
+              <option value="reviews">Most Reviews</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      {/* Technicians list */}
+      <div className="space-y-6">
+        {sortedTechnicians.length > 0 ? (
+          sortedTechnicians.map(tech => (
+            <div key={tech.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
+              <div className="md:flex">
+                <div className="md:w-1/4 bg-gray-50 p-6 flex flex-col items-center justify-center text-center">
+                  <div className="relative h-32 w-32 rounded-full overflow-hidden mb-3">
+                    <Image
+                      src={tech.image}
+                      alt={tech.name}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </div>
+                  <h2 className="text-xl font-semibold">{tech.name}</h2>
+                  <p className="text-gray-600 text-sm mb-2">{tech.company}</p>
+                  
+                  <div className="flex items-center mb-2">
+                    <div className="flex items-center">
+                      <FaStar className="text-yellow-400" />
+                      <span className="ml-1 font-medium">{tech.rating}</span>
+                    </div>
+                    <span className="mx-2 text-gray-300">•</span>
+                    <span className="text-sm text-gray-600">{tech.reviewCount} reviews</span>
+                  </div>
+                  
+                  <div className="flex items-center text-sm">
+                    <FaMapMarkerAlt className="text-gray-500 mr-1" />
+                    <span>{tech.distance} miles away</span>
+                  </div>
+                </div>
+                
+                <div className="md:w-3/4 p-6">
+                  <div className="flex flex-wrap items-center mb-3">
+                    {tech.certified && (
+                      <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full flex items-center mr-2 mb-2">
+                        <FaCheck className="mr-1" /> Certified Technician
+                      </span>
+                    )}
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mb-2">
+                      {tech.availability}
+                    </span>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold mb-2">Specialties</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {tech.specialties.map(specialty => (
+                        <span 
+                          key={specialty} 
+                          className={`px-3 py-1 rounded-full text-sm border ${
+                            selectedSpecialty === specialty 
+                              ? 'bg-primary-100 border-primary-300 text-primary-800' 
+                              : 'bg-gray-100 border-gray-200 text-gray-700'
+                          }`}
+                        >
+                          {specialty}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold mb-2">About</h3>
+                    <p className="text-gray-700">{tech.background}</p>
+                  </div>
+                  
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold mb-2">Rate</h3>
+                    <p className="text-gray-700">{tech.hourlyRate} per hour</p>
+                  </div>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    
+                      href={`tel:${tech.phone}`}
+                      className="px-6 py-3 rounded-lg font-medium bg-primary-600 text-white hover:bg-primary-700 transition flex items-center justify-center"
+                    >
+                      <FaPhone className="mr-2" /> Call Now
+                    </a>
+                    
+                      href={`mailto:${tech.email}?subject=Appliance%20Repair%20Request`}
+                      className="px-6 py-3 rounded-lg font-medium bg-secondary-600 text-white hover:bg-secondary-700 transition flex items-center justify-center"
+                    >
+                      <FaEnvelope className="mr-2" /> Send Email
+                    </a>
+                    <Link
+                      href={`/technicians/${tech.id}`}
+                      className="px-6 py-3 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 transition flex items-center justify-center"
+                    >
+                      View Profile
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="bg-gray-50 rounded-lg p-8 text-center">
+            <h3 className="text-xl font-semibold mb-2">No technicians found</h3>
+            <p className="text-gray-600 mb-4">
+              Try adjusting your search or filters to find technicians in your area.
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedSpecialty('');
+                setAvailabilityFilter('');
+              }}
+              className="text-primary-600 font-medium hover:text-primary-700"
+            >
+              Clear all filters
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
