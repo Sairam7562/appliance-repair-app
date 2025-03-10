@@ -4,7 +4,7 @@ import { FaWrench, FaTwitter, FaFacebook, FaInstagram, FaYoutube } from 'react-i
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-secondary-800 text-white pt-12 pb-8">
+    <footer className="bg-primary-800 text-white pt-12 pb-8" style={{backgroundColor: '#075985'}}>
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
